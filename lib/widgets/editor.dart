@@ -1,7 +1,7 @@
 import 'dart:math' as math;
+import 'package:apidash_design_system/apidash_design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:apidash/consts.dart';
 
 class TextFieldEditor extends StatefulWidget {
   const TextFieldEditor({
@@ -9,11 +9,13 @@ class TextFieldEditor extends StatefulWidget {
     required this.fieldKey,
     this.onChanged,
     this.initialValue,
+    this.readOnly = false,
   });
 
   final String fieldKey;
   final Function(String)? onChanged;
   final String? initialValue;
+  final bool readOnly;
   @override
   State<TextFieldEditor> createState() => _TextFieldEditorState();
 }
@@ -69,9 +71,13 @@ class _TextFieldEditorState extends State<TextFieldEditor> {
         keyboardType: TextInputType.multiline,
         expands: true,
         maxLines: null,
+        readOnly: widget.readOnly,
         style: kCodeStyle,
         textAlignVertical: TextAlignVertical.top,
         onChanged: widget.onChanged,
+        onTapOutside: (PointerDownEvent event) {
+          editorFocusNode.unfocus();
+        },
         decoration: InputDecoration(
           hintText: "Enter content (body)",
           hintStyle: TextStyle(
@@ -90,7 +96,7 @@ class _TextFieldEditorState extends State<TextFieldEditor> {
           enabledBorder: OutlineInputBorder(
             borderRadius: kBorderRadius8,
             borderSide: BorderSide(
-              color: Theme.of(context).colorScheme.surfaceVariant,
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
             ),
           ),
           filled: true,

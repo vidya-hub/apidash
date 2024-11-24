@@ -114,14 +114,15 @@ void main() {
     test("Testing using 'x-' pattern", () {
       String pattern = "x-";
       List<String> expected = [
-        "Access-Control-Max-Age",
         "X-Api-Key",
         "X-Content-Type-Options",
         "X-CSRF-Token",
         "X-Forwarded-For",
         "X-Frame-Options",
         "X-Requested-With",
-        "X-XSS-Protection"
+        "X-XSS-Protection",
+        "Max-Forwards",
+        "Access-Control-Max-Age",
       ];
       expect(getHeaderSuggestions(pattern), expected);
     });
@@ -129,11 +130,11 @@ void main() {
     test("Testing for 'origin' pattern", () {
       String pattern = "origin";
       List<String> expected = [
-        'Access-Control-Allow-Origin',
+        'Origin',
         'Cross-Origin-Embedder-Policy',
         'Cross-Origin-Opener-Policy',
         'Cross-Origin-Resource-Policy',
-        'Origin'
+        'Access-Control-Allow-Origin',
       ];
       expect(getHeaderSuggestions(pattern), expected);
     });

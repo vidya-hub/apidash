@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:apidash/widgets/request_widgets.dart';
+import '../extensions/widget_tester_extensions.dart';
 import '../test_consts.dart';
 
 void main() {
   testWidgets('Testing Request Pane for 1st tab', (tester) async {
+    await tester.setScreenSize(largeWidthDevice);
     await tester.pumpWidget(
       MaterialApp(
         title: 'Request Pane',
@@ -21,7 +23,6 @@ void main() {
     );
 
     expect(find.byType(Center), findsAtLeastNWidgets(1));
-    expect(find.text('Request'), findsOneWidget);
     expect(find.text('Hide Code'), findsOneWidget);
     expect(find.text('View Code'), findsNothing);
     expect(find.text('URL Params'), findsOneWidget);
@@ -35,6 +36,7 @@ void main() {
     expect(find.byIcon(Icons.code_rounded), findsNothing);
   });
   testWidgets('Testing Request Pane for 2nd tab', (tester) async {
+    await tester.setScreenSize(largeWidthDevice);
     await tester.pumpWidget(
       MaterialApp(
         title: 'Request Pane',
@@ -52,7 +54,6 @@ void main() {
     );
 
     expect(find.byType(Center), findsAtLeastNWidgets(1));
-    expect(find.text('Request'), findsOneWidget);
     expect(find.text('Hide Code'), findsOneWidget);
     expect(find.text('View Code'), findsNothing);
     expect(find.text('URL Params'), findsOneWidget);
@@ -66,6 +67,7 @@ void main() {
     expect(find.byIcon(Icons.code_rounded), findsNothing);
   });
   testWidgets('Testing Request Pane for 3rd tab', (tester) async {
+    await tester.setScreenSize(largeWidthDevice);
     await tester.pumpWidget(
       MaterialApp(
         title: 'Request Pane',
@@ -83,7 +85,6 @@ void main() {
     );
 
     expect(find.byType(Center), findsAtLeastNWidgets(1));
-    expect(find.text('Request'), findsOneWidget);
     expect(find.text('Hide Code'), findsNothing);
     expect(find.text('View Code'), findsOneWidget);
     expect(find.text('URL Params'), findsOneWidget);
@@ -117,7 +118,6 @@ void main() {
     );
 
     expect(find.byType(Center), findsAtLeastNWidgets(1));
-    expect(find.text('Request'), findsOneWidget);
     expect(find.text('URL Params'), findsOneWidget);
     expect(find.text('Headers'), findsOneWidget);
     expect(find.text('Body'), findsOneWidget);

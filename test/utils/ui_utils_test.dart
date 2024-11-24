@@ -1,3 +1,5 @@
+import 'package:apidash_core/apidash_core.dart';
+import 'package:apidash_design_system/apidash_design_system.dart';
 import 'package:test/test.dart';
 import 'package:apidash/utils/ui_utils.dart';
 import 'package:flutter/material.dart';
@@ -139,6 +141,21 @@ void main() {
     test('Test getHTTPMethodColor for DELETE Method dark mode', () {
       expect(getHTTPMethodColor(methodDelete, brightness: dark),
           colMethodDeleteDarkModeExpected);
+    });
+  });
+
+  group('Testing getScaffoldKey function', () {
+    test('Returns kEnvScaffoldKey for railIdx 1', () {
+      expect(getScaffoldKey(1), kEnvScaffoldKey);
+    });
+
+    test('Returns kHisScaffoldKey for railIdx 2', () {
+      expect(getScaffoldKey(2), kHisScaffoldKey);
+    });
+
+    test('Returns kHomeScaffoldKey for railIdx other than 1 or 2', () {
+      expect(getScaffoldKey(0), kHomeScaffoldKey);
+      expect(getScaffoldKey(3), kHomeScaffoldKey);
     });
   });
 }

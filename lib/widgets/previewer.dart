@@ -1,12 +1,16 @@
 import 'dart:convert';
+import 'package:apidash_core/apidash_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:jinja/jinja.dart' as jj;
 import 'package:printing/printing.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:vector_graphics_compiler/vector_graphics_compiler.dart';
 import 'error_message.dart';
 import 'uint8_audio_player.dart';
 import 'json_previewer.dart';
+import 'csv_previewer.dart';
+import 'video_previewer.dart';
 import '../consts.dart';
 
 class Previewer extends StatefulWidget {
@@ -32,6 +36,7 @@ class Previewer extends StatefulWidget {
 class _PreviewerState extends State<Previewer> {
   @override
   Widget build(BuildContext context) {
+    var errorTemplate = jj.Template(kMimeTypeRaiseIssue);
     if (widget.type == kTypeApplication && widget.subtype == kSubTypeJson) {
       try {
         var preview = JsonPreviewer(
@@ -51,14 +56,26 @@ class _PreviewerState extends State<Previewer> {
         );
         return svgImg;
       } catch (e) {
-        return const ErrorMessage(message: kSvgError);
+        return ErrorMessage(
+          message: errorTemplate.render({
+            "showRaw": true,
+            "showContentType": false,
+            "type": "svg",
+          }),
+        );
       }
     }
     if (widget.type == kTypeImage) {
       return Image.memory(
         widget.bytes,
         errorBuilder: (context, _, stackTrace) {
-          return const ErrorMessage(message: kImageError);
+          return ErrorMessage(
+            message: errorTemplate.render({
+              "showRaw": false,
+              "showContentType": false,
+              "type": kTypeImage,
+            }),
+          );
         },
       );
     }
@@ -67,7 +84,13 @@ class _PreviewerState extends State<Previewer> {
         build: (_) => widget.bytes,
         useActions: false,
         onError: (context, error) {
-          return const ErrorMessage(message: kPdfError);
+          return ErrorMessage(
+            message: errorTemplate.render({
+              "showRaw": false,
+              "showContentType": false,
+              "type": kSubTypePdf,
+            }),
+          );
         },
       );
     }
@@ -77,16 +100,49 @@ class _PreviewerState extends State<Previewer> {
         type: widget.type!,
         subtype: widget.subtype!,
         errorBuilder: (context, error, stacktrace) {
-          return const ErrorMessage(message: kAudioError);
+          return ErrorMessage(
+            message: errorTemplate.render({
+              "showRaw": false,
+              "showContentType": false,
+              "type": kTypeAudio,
+            }),
+          );
         },
       );
     }
-    if (widget.type == kTypeVideo) {
-      // TODO: Video Player
+    if (widget.type == kTypeText && widget.subtype == kSubTypeCsv) {
+      return CsvPreviewer(
+        body: widget.body,
+        errorWidget: ErrorMessage(
+          message: errorTemplate.render({
+            "showRaw": false,
+            "showContentType": false,
+            "type": kSubTypeCsv,
+          }),
+        ),
+      );
     }
-    String message = widget.hasRaw
-        ? "$kMimeTypeRawRaiseIssueStart${widget.type}/${widget.subtype}$kMimeTypeRaiseIssue"
-        : "$kMimeTypeRaiseIssueStart${widget.type}/${widget.subtype}$kMimeTypeRaiseIssue";
-    return ErrorMessage(message: message);
+    if (widget.type == kTypeVideo) {
+      try {
+        var preview = VideoPreviewer(videoBytes: widget.bytes);
+        return preview;
+      } catch (e) {
+        return ErrorMessage(
+          message: errorTemplate.render({
+            "showRaw": false,
+            "showContentType": false,
+            "type": kTypeVideo,
+          }),
+        );
+      }
+    }
+    var errorText = errorTemplate.render({
+      "showRaw": widget.hasRaw,
+      "showContentType": true,
+      "type": "${widget.type}/${widget.subtype}",
+    });
+    return ErrorMessage(
+      message: errorText,
+    );
   }
 }

@@ -1,11 +1,11 @@
+import 'package:apidash_core/apidash_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'settings_providers.dart';
-import 'ui_providers.dart';
+import 'package:apidash/consts.dart';
+import 'providers.dart';
 import '../models/models.dart';
-import '../services/services.dart' show hiveHandler, HiveHandler, request;
-import '../utils/utils.dart' show uuid, collectionToHAR;
-import '../consts.dart';
-import 'package:http/http.dart' as http;
+import '../services/services.dart' show hiveHandler, HiveHandler;
+import '../utils/utils.dart'
+    show getNewUuid, collectionToHAR, substituteHttpRequestModel;
 
 final selectedIdStateProvider = StateProvider<String?>((ref) => null);
 
@@ -45,7 +45,7 @@ class CollectionStateNotifier
 
   final Ref ref;
   final HiveHandler hiveHandler;
-  final baseResponseModel = const ResponseModel();
+  final baseResponseModel = const HttpResponseModel();
 
   bool hasId(String id) => state?.keys.contains(id) ?? false;
 
@@ -54,9 +54,10 @@ class CollectionStateNotifier
   }
 
   void add() {
-    final id = uuid.v1();
+    final id = getNewUuid();
     final newRequestModel = RequestModel(
       id: id,
+      httpRequestModel: const HttpRequestModel(),
     );
     var map = {...state!};
     map[id] = newRequestModel;
@@ -65,6 +66,23 @@ class CollectionStateNotifier
         .read(requestSequenceProvider.notifier)
         .update((state) => [id, ...state]);
     ref.read(selectedIdStateProvider.notifier).state = newRequestModel.id;
+    ref.read(hasUnsavedChangesProvider.notifier).state = true;
+  }
+
+  void addRequestModel(HttpRequestModel httpRequestModel) {
+    final id = getNewUuid();
+    final newRequestModel = RequestModel(
+      id: id,
+      httpRequestModel: httpRequestModel,
+    );
+    var map = {...state!};
+    map[id] = newRequestModel;
+    state = map;
+    ref
+        .read(requestSequenceProvider.notifier)
+        .update((state) => [id, ...state]);
+    ref.read(selectedIdStateProvider.notifier).state = newRequestModel.id;
+    ref.read(hasUnsavedChangesProvider.notifier).state = true;
   }
 
   void reorder(int oldIdx, int newIdx) {
@@ -72,6 +90,7 @@ class CollectionStateNotifier
     final itemId = itemIds.removeAt(oldIdx);
     itemIds.insert(newIdx, itemId);
     ref.read(requestSequenceProvider.notifier).state = [...itemIds];
+    ref.read(hasUnsavedChangesProvider.notifier).state = true;
   }
 
   void remove(String id) {
@@ -94,16 +113,40 @@ class CollectionStateNotifier
     var map = {...state!};
     map.remove(id);
     state = map;
+    ref.read(hasUnsavedChangesProvider.notifier).state = true;
+  }
+
+  void clearResponse(String? id) {
+    if (id == null || state?[id] == null) return;
+    var currentModel = state![id]!;
+    final newModel = currentModel.copyWith(
+      responseStatus: null,
+      message: null,
+      httpResponseModel: null,
+      isWorking: false,
+      sendingTime: null,
+    );
+    var map = {...state!};
+    map[id] = newModel;
+    state = map;
+    ref.read(hasUnsavedChangesProvider.notifier).state = true;
   }
 
   void duplicate(String id) {
-    final newId = uuid.v1();
+    final newId = getNewUuid();
 
     var itemIds = ref.read(requestSequenceProvider);
     int idx = itemIds.indexOf(id);
-
-    final newModel = state![id]!.duplicate(
+    var currentModel = state![id]!;
+    final newModel = currentModel.copyWith(
       id: newId,
+      name: "${currentModel.name} (copy)",
+      requestTabIndex: 0,
+      responseStatus: null,
+      message: null,
+      httpResponseModel: null,
+      isWorking: false,
+      sendingTime: null,
     );
 
     itemIds.insert(idx + 1, newId);
@@ -113,6 +156,33 @@ class CollectionStateNotifier
 
     ref.read(requestSequenceProvider.notifier).state = [...itemIds];
     ref.read(selectedIdStateProvider.notifier).state = newId;
+    ref.read(hasUnsavedChangesProvider.notifier).state = true;
+  }
+
+  void duplicateFromHistory(HistoryRequestModel historyRequestModel) {
+    final newId = getNewUuid();
+
+    var itemIds = ref.read(requestSequenceProvider);
+    var currentModel = historyRequestModel;
+    final newModel = RequestModel(
+      id: newId,
+      name: "${currentModel.metaData.name} (history)",
+      httpRequestModel: currentModel.httpRequestModel,
+      responseStatus: currentModel.metaData.responseStatus,
+      message: kResponseCodeReasons[currentModel.metaData.responseStatus],
+      httpResponseModel: currentModel.httpResponseModel,
+      isWorking: false,
+      sendingTime: null,
+    );
+
+    itemIds.insert(0, newId);
+    var map = {...state!};
+    map[newId] = newModel;
+    state = map;
+
+    ref.read(requestSequenceProvider.notifier).state = [...itemIds];
+    ref.read(selectedIdStateProvider.notifier).state = newId;
+    ref.read(hasUnsavedChangesProvider.notifier).state = true;
   }
 
   void update(
@@ -122,56 +192,83 @@ class CollectionStateNotifier
     String? name,
     String? description,
     int? requestTabIndex,
-    List<NameValueModel>? requestHeaders,
-    List<NameValueModel>? requestParams,
+    List<NameValueModel>? headers,
+    List<NameValueModel>? params,
     List<bool>? isHeaderEnabledList,
     List<bool>? isParamEnabledList,
-    ContentType? requestBodyContentType,
-    String? requestBody,
-    List<FormDataModel>? requestFormDataList,
+    ContentType? bodyContentType,
+    String? body,
+    List<FormDataModel>? formData,
     int? responseStatus,
     String? message,
-    ResponseModel? responseModel,
+    HttpResponseModel? httpResponseModel,
   }) {
-    final newModel = state![id]!.copyWith(
-        method: method,
-        url: url,
-        name: name,
-        description: description,
-        requestTabIndex: requestTabIndex,
-        requestHeaders: requestHeaders,
-        requestParams: requestParams,
-        isHeaderEnabledList: isHeaderEnabledList,
-        isParamEnabledList: isParamEnabledList,
-        requestBodyContentType: requestBodyContentType,
-        requestBody: requestBody,
-        requestFormDataList: requestFormDataList,
-        responseStatus: responseStatus,
-        message: message,
-        responseModel: responseModel);
-    //print(newModel);
+    var currentModel = state![id]!;
+    var currentHttpRequestModel = currentModel.httpRequestModel;
+    final newModel = currentModel.copyWith(
+      name: name ?? currentModel.name,
+      description: description ?? currentModel.description,
+      requestTabIndex: requestTabIndex ?? currentModel.requestTabIndex,
+      httpRequestModel: currentHttpRequestModel?.copyWith(
+        method: method ?? currentHttpRequestModel.method,
+        url: url ?? currentHttpRequestModel.url,
+        headers: headers ?? currentHttpRequestModel.headers,
+        params: params ?? currentHttpRequestModel.params,
+        isHeaderEnabledList:
+            isHeaderEnabledList ?? currentHttpRequestModel.isHeaderEnabledList,
+        isParamEnabledList:
+            isParamEnabledList ?? currentHttpRequestModel.isParamEnabledList,
+        bodyContentType:
+            bodyContentType ?? currentHttpRequestModel.bodyContentType,
+        body: body ?? currentHttpRequestModel.body,
+        formData: formData ?? currentHttpRequestModel.formData,
+      ),
+      responseStatus: responseStatus ?? currentModel.responseStatus,
+      message: message ?? currentModel.message,
+      httpResponseModel: httpResponseModel ?? currentModel.httpResponseModel,
+    );
+
     var map = {...state!};
     map[id] = newModel;
     state = map;
+    ref.read(hasUnsavedChangesProvider.notifier).state = true;
   }
 
   Future<void> sendRequest(String id) async {
-    ref.read(sentRequestIdStateProvider.notifier).state = id;
     ref.read(codePaneVisibleStateProvider.notifier).state = false;
-    final defaultUriScheme =
-        ref.read(settingsProvider.select((value) => value.defaultUriScheme));
+    final defaultUriScheme = ref.read(
+      settingsProvider.select(
+        (value) => value.defaultUriScheme,
+      ),
+    );
+
     RequestModel requestModel = state![id]!;
-    (http.Response?, Duration?, String?)? responseRec = await request(
-      requestModel,
+
+    if (requestModel.httpRequestModel == null) {
+      return;
+    }
+
+    HttpRequestModel substitutedHttpRequestModel =
+        getSubstitutedHttpRequestModel(requestModel.httpRequestModel!);
+
+    // set current model's isWorking to true and update state
+    var map = {...state!};
+    map[id] = requestModel.copyWith(
+      isWorking: true,
+      sendingTime: DateTime.now(),
+    );
+    state = map;
+
+    (HttpResponse?, Duration?, String?)? responseRec = await request(
+      substitutedHttpRequestModel,
       defaultUriScheme: defaultUriScheme,
-      isMultiPartRequest:
-          requestModel.requestBodyContentType == ContentType.formdata,
     );
     late final RequestModel newRequestModel;
     if (responseRec.$1 == null) {
       newRequestModel = requestModel.copyWith(
         responseStatus: -1,
         message: responseRec.$3,
+        isWorking: false,
       );
     } else {
       final responseModel = baseResponseModel.fromResponse(
@@ -182,13 +279,33 @@ class CollectionStateNotifier
       newRequestModel = requestModel.copyWith(
         responseStatus: statusCode,
         message: kResponseCodeReasons[statusCode],
-        responseModel: responseModel,
+        httpResponseModel: responseModel,
+        isWorking: false,
       );
+      String newHistoryId = getNewUuid();
+      HistoryRequestModel model = HistoryRequestModel(
+        historyId: newHistoryId,
+        metaData: HistoryMetaModel(
+          historyId: newHistoryId,
+          requestId: id,
+          name: requestModel.name,
+          url: substitutedHttpRequestModel.url,
+          method: substitutedHttpRequestModel.method,
+          responseStatus: statusCode,
+          timeStamp: DateTime.now(),
+        ),
+        httpRequestModel: substitutedHttpRequestModel,
+        httpResponseModel: responseModel,
+      );
+      ref.read(historyMetaStateNotifier.notifier).addHistoryRequest(model);
     }
-    ref.read(sentRequestIdStateProvider.notifier).state = null;
-    var map = {...state!};
+
+    // update state with response data
+    map = {...state!};
     map[id] = newRequestModel;
     state = map;
+
+    ref.read(hasUnsavedChangesProvider.notifier).state = true;
   }
 
   Future<void> clearData() async {
@@ -198,15 +315,17 @@ class CollectionStateNotifier
     ref.read(clearDataStateProvider.notifier).state = false;
     ref.read(requestSequenceProvider.notifier).state = [];
     state = {};
+    ref.read(hasUnsavedChangesProvider.notifier).state = true;
   }
 
   bool loadData() {
     var ids = hiveHandler.getIds();
     if (ids == null || ids.length == 0) {
-      String newId = uuid.v1();
+      String newId = getNewUuid();
       state = {
         newId: RequestModel(
           id: newId,
+          httpRequestModel: const HttpRequestModel(),
         ),
       };
       return true;
@@ -215,8 +334,13 @@ class CollectionStateNotifier
       for (var id in ids) {
         var jsonModel = hiveHandler.getRequestModel(id);
         if (jsonModel != null) {
-          var requestModel =
-              RequestModel.fromJson(Map<String, dynamic>.from(jsonModel));
+          var jsonMap = Map<String, Object?>.from(jsonModel);
+          var requestModel = RequestModel.fromJson(jsonMap);
+          if (requestModel.httpRequestModel == null) {
+            requestModel = requestModel.copyWith(
+              httpRequestModel: const HttpRequestModel(),
+            );
+          }
           data[id] = requestModel;
         }
       }
@@ -233,11 +357,14 @@ class CollectionStateNotifier
     for (var id in ids) {
       await hiveHandler.setRequestModel(
         id,
-        state?[id]?.toJson(includeResponse: saveResponse),
+        saveResponse
+            ? (state?[id])?.toJson()
+            : (state?[id]?.copyWith(httpResponseModel: null))?.toJson(),
       );
     }
     await hiveHandler.removeUnused();
     ref.read(saveDataStateProvider.notifier).state = false;
+    ref.read(hasUnsavedChangesProvider.notifier).state = false;
   }
 
   Future<Map<String, dynamic>> exportDataToHAR() async {
@@ -246,5 +373,17 @@ class CollectionStateNotifier
     // return {
     //   "data": state!.map((e) => e.toJson(includeResponse: false)).toList()
     // };
+  }
+
+  HttpRequestModel getSubstitutedHttpRequestModel(
+      HttpRequestModel httpRequestModel) {
+    var envMap = ref.read(availableEnvironmentVariablesStateProvider);
+    var activeEnvId = ref.read(activeEnvironmentIdStateProvider);
+
+    return substituteHttpRequestModel(
+      httpRequestModel,
+      envMap,
+      activeEnvId,
+    );
   }
 }

@@ -1,8 +1,9 @@
+import 'package:apidash_core/apidash_core.dart';
+import 'package:apidash_design_system/apidash_design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:apidash/utils/utils.dart' show getDarkModeColor;
 import 'package:apidash/widgets/texts.dart';
-import 'package:apidash/consts.dart';
 
 void main() {
   testWidgets('Testing when method is GET', (tester) async {
@@ -24,6 +25,7 @@ void main() {
         widget is Text && widget.style!.color == kColorHttpMethodGet);
     expect(getTextWithColor, findsOneWidget);
   });
+
   testWidgets('Testing when method is DELETE', (tester) async {
     var methodDel = HTTPVerb.delete;
     await tester.pumpWidget(
@@ -43,5 +45,26 @@ void main() {
     final delTextWithColor = find.byWidgetPredicate(
         (widget) => widget is Text && widget.style!.color == colDelDarkMode);
     expect(delTextWithColor, findsOneWidget);
+  });
+
+  testWidgets('Testing StatusCode', (WidgetTester tester) async {
+    const int testStatusCode = 200;
+    const TextStyle testStyle = TextStyle(fontSize: 20);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: StatusCode(
+            statusCode: testStatusCode,
+            style: testStyle,
+          ),
+        ),
+      ),
+    );
+
+    Finder code = find.text(testStatusCode.toString());
+    expect(code, findsOneWidget);
+    final Text textWidget = tester.widget(code);
+    expect(textWidget.style?.fontSize, testStyle.fontSize);
   });
 }

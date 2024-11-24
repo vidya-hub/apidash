@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:apidash/utils/har_utils.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import '../request_models.dart';
+import '../models/request_models.dart';
 
 void main() {
   group(
@@ -68,7 +68,7 @@ void main() {
               },
               {
                 'startedDateTime': 'ABC',
-                'comment': 'id:enabledRows',
+                'comment': 'id:get11',
                 'serverIPAddress': '',
                 'time': 0,
                 'timings': {
@@ -101,7 +101,7 @@ void main() {
                 'request': {
                   'method': 'GET',
                   'url':
-                      'https://api.foss42.com/humanize/social?num=8700000&digits=3&system=SS&add_space=true',
+                      'https://api.apidash.dev/humanize/social?num=8700000&digits=3&system=SS&add_space=true',
                   'httpVersion': 'HTTP/1.1',
                   'queryString': [
                     {'name': 'num', 'value': '8700000', 'comment': ''},
@@ -162,7 +162,7 @@ void main() {
                 },
                 'request': {
                   'method': 'POST',
-                  'url': 'https://api.foss42.com/case/lower',
+                  'url': 'https://api.apidash.dev/case/lower',
                   'httpVersion': 'HTTP/1.1',
                   'queryString': [],
                   'headers': [
@@ -222,7 +222,8 @@ void main() {
             {'name': 'User-Agent', 'value': 'Test Agent'}
           ]
         };
-        expect(requestModelToHARJsonRequest(requestModelGet6), expectedResult);
+        expect(requestModelToHARJsonRequest(requestModelGet6.httpRequestModel),
+            expectedResult);
       });
 
       test('Test requestModelToHARJsonRequest exportMode=true', () {
@@ -243,7 +244,7 @@ void main() {
         };
         expect(
             requestModelToHARJsonRequest(
-              requestModelGet6,
+              requestModelGet6.httpRequestModel,
               exportMode: true,
             ),
             expectedResult);
@@ -252,7 +253,7 @@ void main() {
       test('Test requestModelToHARJsonRequest exportMode=true', () {
         Map<String, dynamic> expectedResult = {
           'method': 'POST',
-          'url': 'https://api.foss42.com/case/lower',
+          'url': 'https://api.apidash.dev/case/lower',
           'httpVersion': 'HTTP/1.1',
           'queryString': [],
           'headers': [
@@ -261,18 +262,23 @@ void main() {
           'postData': {
             'mimeType': 'application/json',
             'text': '{\n'
-                '"text": "I LOVE Flutter"\n'
+                '"text": "I LOVE Flutter",\n'
+                '"flag": null,\n'
+                '"male": true,\n'
+                '"female": false,\n'
+                '"no": 1.2,\n'
+                '"arr": ["null", "true", "false", null]\n'
                 '}',
             'comment': ''
           },
           'comment': '',
           'cookies': [],
           'headersSize': -1,
-          'bodySize': 28
+          'bodySize': 124
         };
         expect(
             requestModelToHARJsonRequest(
-              requestModelPost2,
+              requestModelPost2.httpRequestModel,
               exportMode: true,
             ),
             expectedResult);
@@ -282,7 +288,7 @@ void main() {
         Map<String, dynamic> expectedResult = {
           'method': 'GET',
           'url':
-              'https://api.foss42.com/humanize/social?num=8700000&digits=3&system=SS&add_space=true',
+              'https://api.apidash.dev/humanize/social?num=8700000&digits=3&system=SS&add_space=true',
           'httpVersion': 'HTTP/1.1',
           'queryString': [
             {'name': 'num', 'value': '8700000'},
@@ -295,13 +301,14 @@ void main() {
             {'name': 'Content-Type', 'value': 'application/json'}
           ]
         };
-        expect(requestModelToHARJsonRequest(requestModelGet11), expectedResult);
+        expect(requestModelToHARJsonRequest(requestModelGet11.httpRequestModel),
+            expectedResult);
       });
 
       test('Test requestModelToHARJsonRequest useEnabled=true', () {
         Map<String, dynamic> expectedResult = {
           'method': 'GET',
-          'url': 'https://api.foss42.com/humanize/social?num=8700000&digits=3',
+          'url': 'https://api.apidash.dev/humanize/social?num=8700000&digits=3',
           'httpVersion': 'HTTP/1.1',
           'queryString': [
             {'name': 'num', 'value': '8700000'},
@@ -313,7 +320,7 @@ void main() {
         };
         expect(
             requestModelToHARJsonRequest(
-              requestModelGet11,
+              requestModelGet11.httpRequestModel,
               useEnabled: true,
             ),
             expectedResult);

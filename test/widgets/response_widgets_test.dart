@@ -1,27 +1,50 @@
+import 'package:apidash_core/apidash_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'package:http_parser/http_parser.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:apidash/widgets/response_widgets.dart';
 import 'package:lottie/lottie.dart';
 import 'package:apidash/utils/utils.dart';
 import 'package:apidash/consts.dart';
-import 'package:apidash/models/models.dart';
+import '../models/http_response_models.dart';
 import '../test_consts.dart';
+import '../models/request_models.dart';
 
 void main() {
-  testWidgets('Testing Sending Widget', (tester) async {
+  testWidgets('Testing Sending Widget Without Timer', (tester) async {
     await tester.pumpWidget(
       MaterialApp(
         title: 'Send',
         theme: kThemeDataDark,
         home: const Scaffold(
-          body: SendingWidget(),
+          body: SendingWidget(
+            startSendingTime: null,
+          ),
         ),
       ),
     );
 
     expect(find.byType(Lottie), findsOneWidget);
+  });
+
+  testWidgets('Testing Sending Widget With Timer', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        title: 'Send',
+        theme: kThemeDataDark,
+        home: Scaffold(
+          body: SendingWidget(
+            startSendingTime: DateTime.now(),
+          ),
+        ),
+      ),
+    );
+    expect(find.text('Time elapsed: 0 ms'), findsOneWidget);
+    expect(find.byType(Lottie), findsOneWidget);
+
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(find.text('Time elapsed: 1.00 s'), findsOneWidget);
   });
 
   testWidgets('Testing Not Sent Widget', (tester) async {
@@ -52,11 +75,8 @@ void main() {
       ),
     );
 
-    expect(find.byType(RichText), findsAtLeastNWidgets(1));
-    expect(
-        find.textContaining("Response (", findRichText: true), findsOneWidget);
-    expect(find.text('Hi'), findsOneWidget);
     expect(find.textContaining("200", findRichText: true), findsOneWidget);
+    expect(find.textContaining("Hi", findRichText: true), findsOneWidget);
     expect(find.text(humanizeDuration(const Duration(microseconds: 23))),
         findsOneWidget);
   });
@@ -73,7 +93,7 @@ void main() {
       ),
     );
 
-    expect(find.text('Body'), findsOneWidget);
+    expect(find.text('Response Body'), findsOneWidget);
     expect(find.text('Headers'), findsOneWidget);
 
     await tester.tap(find.text('Headers'));
@@ -81,7 +101,7 @@ void main() {
 
     expect(find.text('first'), findsNothing);
     expect(find.text('second'), findsOneWidget);
-    await tester.tap(find.text('Body'));
+    await tester.tap(find.text('Response Body'));
     await tester.pumpAndSettle();
 
     expect(find.text('first'), findsOneWidget);
@@ -102,12 +122,26 @@ void main() {
 
     expect(find.text('xyz (2 items)'), findsOneWidget);
 
-    expect(find.byIcon(Icons.content_copy), findsOneWidget);
-    expect(find.text(kLabelCopy), findsOneWidget);
+    final icon = find.byIcon(Icons.content_copy);
+    expect(icon, findsOneWidget);
 
-    final textButton1 = find.byType(TextButton);
-    expect(textButton1, findsOneWidget);
-    await tester.tap(textButton1);
+    Finder button;
+    if (tester.any(find.ancestor(
+        of: icon,
+        matching: find.byWidgetPredicate((widget) => widget is TextButton)))) {
+      expect(find.text(kLabelCopy), findsOneWidget);
+      button = find.ancestor(
+          of: icon,
+          matching: find.byWidgetPredicate((widget) => widget is TextButton));
+    } else if (tester
+        .any(find.ancestor(of: icon, matching: find.byType(IconButton)))) {
+      button = find.byType(IconButton);
+    } else {
+      fail('No TextButton or IconButton found');
+    }
+
+    expect(button, findsOneWidget);
+    await tester.tap(button);
   });
 
   testWidgets('Testing Response Headers', (tester) async {
@@ -162,68 +196,10 @@ void main() {
         findsOneWidget);
   });
 
-  int statusCode = 200;
-  Map<String, String> responseHeaders = {
-    "content-length": "16",
-    "x-cloud-trace-context": "dad62aaf7f640300bbf629f4ae2f2f63",
-    "content-type": "application/json",
-    "date": "Sun, 23 Apr 2023 23:46:31 GMT",
-    "server": "Google Frontend"
-  };
-  Map<String, String> requestHeaders = {
-    "content-length": "18",
-    "content-type": "application/json; charset=utf-8"
-  };
-  String responseBody = '{"data":"world"}';
-  Uint8List bodyBytes = Uint8List.fromList([
-    123,
-    34,
-    100,
-    97,
-    116,
-    97,
-    34,
-    58,
-    34,
-    119,
-    111,
-    114,
-    108,
-    100,
-    34,
-    125
-  ]);
-  String formattedBody = '''{
-  "data": "world"
-}''';
-  Duration time = const Duration(milliseconds: 516);
-
-  RequestModel requestModel = const RequestModel(
-      id: '1',
-      method: HTTPVerb.post,
-      url: 'api.foss42.com/case/lower',
-      name: 'foss42 api',
-      requestHeaders: [
-        NameValueModel(name: 'content-length', value: '18'),
-        NameValueModel(
-            name: 'content-type', value: 'application/json; charset=utf-8')
-      ],
-      requestBodyContentType: ContentType.json,
-      requestBody: '''{
-"text":"WORLD"
-}''',
-      responseStatus: 200);
-
   testWidgets('Testing Response Body, no body', (tester) async {
-    ResponseModel responseModelNoBody = ResponseModel(
-        statusCode: statusCode,
-        headers: responseHeaders,
-        requestHeaders: requestHeaders,
-        formattedBody: formattedBody,
-        bodyBytes: bodyBytes,
-        time: time);
+    var responseModelNoBody = responseModel.copyWith(body: null);
     var requestModelNoResponseBody =
-        requestModel.copyWith(responseModel: responseModelNoBody);
+        testRequestModel.copyWith(httpResponseModel: responseModelNoBody);
     await tester.pumpWidget(
       MaterialApp(
         title: 'Response Body',
@@ -238,16 +214,15 @@ void main() {
         findsOneWidget);
   });
 
-  testWidgets('Testing Response Body, no mediaType', (tester) async {
-    ResponseModel responseModelNoHeaders = ResponseModel(
-        statusCode: statusCode,
-        body: responseBody,
-        requestHeaders: requestHeaders,
-        formattedBody: formattedBody,
-        bodyBytes: bodyBytes,
-        time: time);
+  testWidgets(
+      'Testing Response Body, no mediaType; shoud be default plaintext preview',
+      (tester) async {
+    var responseModelNoHeaders = responseModel.copyWith(
+      headers: null,
+      formattedBody: null,
+    );
     var requestModelNoResponseHeaders =
-        requestModel.copyWith(responseModel: responseModelNoHeaders);
+        testRequestModel.copyWith(httpResponseModel: responseModelNoHeaders);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -260,23 +235,18 @@ void main() {
       ),
     );
 
-    expect(
-        find.text(
-            'Unknown Response Content-Type - ${responseModelNoHeaders.contentType}. $kUnexpectedRaiseIssue'),
-        findsOneWidget);
+    expect(find.text("Raw"), findsOneWidget);
+    expect(find.text('{"data":"world"}'), findsOneWidget);
   });
 
   testWidgets('Testing Response Body for No body view', (tester) async {
-    ResponseModel responseModelOctet = ResponseModel(
-        statusCode: statusCode,
-        body: responseBody,
-        headers: const {"content-type": "application/octet-stream"},
-        requestHeaders: requestHeaders,
-        formattedBody: formattedBody,
-        bodyBytes: bodyBytes,
-        time: time);
+    String expected =
+        "We encountered an error rendering this Content-Type application/octet-stream.\nPlease raise an issue in API Dash GitHub repo so that we can look into this issue.";
+    var responseModelOctet = responseModel.copyWith(
+      headers: const {"content-type": "application/octet-stream"},
+    );
     var requestModelNoResponseHeaders =
-        requestModel.copyWith(responseModel: responseModelOctet);
+        testRequestModel.copyWith(httpResponseModel: responseModelOctet);
     await tester.pumpWidget(
       MaterialApp(
         title: 'Response Body',
@@ -288,23 +258,16 @@ void main() {
       ),
     );
     //await Future.delayed(const Duration(seconds: 5));
-    expect(
-        find.text(
-            "${kMimeTypeRaiseIssueStart}application/octet-stream$kMimeTypeRaiseIssue"),
-        findsOneWidget);
+    expect(find.text(expected), findsOneWidget);
     expect(find.byIcon(Icons.download), findsOneWidget);
   });
 
   testWidgets('Testing Response Body for no formatted body', (tester) async {
-    ResponseModel responseModel = ResponseModel(
-        statusCode: statusCode,
-        body: responseBody,
-        headers: responseHeaders,
-        requestHeaders: requestHeaders,
-        bodyBytes: bodyBytes,
-        time: time);
-    var requestModelNoResponseHeaders =
-        requestModel.copyWith(responseModel: responseModel);
+    var responseModelNoFormattedBody = responseModel.copyWith(
+      formattedBody: null,
+    );
+    var requestModelNoResponseHeaders = testRequestModel.copyWith(
+        httpResponseModel: responseModelNoFormattedBody);
     await tester.pumpWidget(
       MaterialApp(
         title: 'Response Body',
@@ -320,6 +283,9 @@ void main() {
   });
 
   testWidgets('Testing Body Success for ResponseBodyView.none', (tester) async {
+    String expected =
+        "Please click on 'Raw' to view the unformatted raw results as we encountered an error rendering this Content-Type application/json.\nPlease raise an issue in API Dash GitHub repo so that we can look into this issue.";
+
     await tester.pumpWidget(
       MaterialApp(
         title: 'Body Success',
@@ -339,10 +305,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(
-        find.text(
-            "${kMimeTypeRawRaiseIssueStart}application/json$kMimeTypeRaiseIssue"),
-        findsOneWidget);
+    expect(find.text(expected), findsOneWidget);
     expect(find.byIcon(Icons.download), findsOneWidget);
   });
 
@@ -372,7 +335,7 @@ void main() {
     String code = r'''import 'package:http/http.dart' as http;
 
 void main() async {
-  var uri = Uri.parse('https://api.foss42.com/country/codes');
+  var uri = Uri.parse('https://api.apidash.dev/country/codes');
 
   final response = await http.get(uri);
 

@@ -1,3 +1,5 @@
+import 'package:apidash_core/apidash_core.dart';
+import 'package:apidash_design_system/apidash_design_system.dart';
 import 'package:flutter/material.dart';
 import '../consts.dart';
 
@@ -68,4 +70,15 @@ double? getJsonPreviewerMaxRootNodeWidth(double w) {
     return 200;
   }
   return w - 150;
+}
+
+GlobalKey<ScaffoldState> getScaffoldKey(int railIdx) {
+  switch (railIdx) {
+    case 1:
+      return kEnvScaffoldKey;
+    case 2:
+      return kHisScaffoldKey;
+    default:
+      return kHomeScaffoldKey;
+  }
 }

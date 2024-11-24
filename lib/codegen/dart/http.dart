@@ -1,29 +1,23 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:apidash_core/apidash_core.dart';
 import 'package:code_builder/code_builder.dart';
 import 'package:dart_style/dart_style.dart';
-import 'package:apidash/models/models.dart' show RequestModel;
-import 'package:apidash/consts.dart';
 import 'shared.dart';
 
 class DartHttpCodeGen {
   String? getCode(
-    RequestModel requestModel,
-    String defaultUriScheme,
+    HttpRequestModel requestModel,
   ) {
     try {
-      String url = requestModel.url;
-      if (!url.contains("://") && url.isNotEmpty) {
-        url = "$defaultUriScheme://$url";
-      }
       final next = generatedDartCode(
-        url: url,
+        url: requestModel.url,
         method: requestModel.method,
         queryParams: requestModel.enabledParamsMap,
         headers: {...requestModel.enabledHeadersMap},
-        contentType: requestModel.requestBodyContentType,
+        contentType: requestModel.bodyContentType,
         hasContentTypeHeader: requestModel.hasContentTypeHeader,
-        body: requestModel.requestBody,
+        body: requestModel.body,
         formData: requestModel.formDataMapList,
       );
       return next;
@@ -53,7 +47,9 @@ class DartHttpCodeGen {
         declareVar('uri').assign(refer('Uri.parse').call([literalString(url)]));
 
     Expression? dataExp;
-    if (kMethodsWithBody.contains(method) && (body?.isNotEmpty ?? false)) {
+    if (kMethodsWithBody.contains(method) &&
+        (body?.isNotEmpty ?? false) &&
+        contentType != ContentType.formdata) {
       final strContent = CodeExpression(Code('r\'\'\'$body\'\'\''));
       dataExp = declareVar('body', type: refer('String')).assign(strContent);
       if (!hasContentTypeHeader) {
@@ -125,17 +121,29 @@ class DartHttpCodeGen {
 
     final addHeaders = refer('request.headers.addAll').call([refer('headers')]);
     const multiPartList = Code('''
-    for (Map<String, String> formData in formDataList){
-          if (formData['type'] == 'text') {
-              request.fields.addAll({formData['name']: formData['value']});
-            } else {
-              request.files.add(
-                await http.MultipartFile.fromPath(
-                  formData['name'],
-                  formData['value'],
-                ),
-              );
-          }
+    for (var formData in formDataList) {
+    if (formData != null) {
+      final name = formData['name'];
+      final value = formData['value'];
+      final type = formData['type'];
+
+      if (name != null && value != null && type != null) {
+        if (type == 'text') {
+          request.fields.addAll({name: value});
+        } else {
+          request.files.add(
+            await http.MultipartFile.fromPath(
+              name,
+              value,
+            ),
+          );
+        }
+      } else {
+        print('Error: formData has null name, value, or type.');
+      }
+    } else {
+      print('Error: formData is null.');
+    }
   }
 ''');
     var multiPartRequestSend =

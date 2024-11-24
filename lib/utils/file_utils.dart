@@ -1,10 +1,10 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:file_selector/file_selector.dart';
 import 'package:path/path.dart' as p;
 import 'package:mime_dart/mime_dart.dart';
 import 'package:uuid/uuid.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:file_picker/file_picker.dart';
 
 const uuid = Uuid();
 
@@ -43,16 +43,21 @@ String getShortPath(String path) {
   var f = p.split(path);
   if (f.length > 2) {
     f = f.sublist(f.length - 2);
-    return ".../${p.joinAll(f)}";
+    return p.join("...", p.joinAll(f));
   }
   return path;
 }
 
-String getTempFileName() {
-  return uuid.v1();
+String getFilenameFromPath(String path) {
+  var f = p.split(path);
+  return f.lastOrNull ?? "";
 }
 
-Future<FilePickerResult?> pickFile() async {
-  FilePickerResult? pickedResult = await FilePicker.platform.pickFiles();
+String getTempFileName() {
+  return getNewUuid();
+}
+
+Future<XFile?> pickFile() async {
+  XFile? pickedResult = await openFile();
   return pickedResult;
 }

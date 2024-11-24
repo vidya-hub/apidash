@@ -1,3 +1,4 @@
+import 'package:apidash_design_system/apidash_design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:highlighter/highlighter.dart' show highlight;
 import 'package:apidash/consts.dart';
@@ -121,7 +122,8 @@ class ViewCodePane extends StatelessWidget {
                   : Theme.of(context).colorScheme.primaryContainer)
               .withOpacity(kForegroundOpacity),
           Theme.of(context).colorScheme.surface),
-      border: Border.all(color: Theme.of(context).colorScheme.surfaceVariant),
+      border: Border.all(
+          color: Theme.of(context).colorScheme.surfaceContainerHighest),
       borderRadius: kBorderRadius8,
     );
 

@@ -1,5 +1,6 @@
 import 'package:apidash/widgets/widgets.dart'
     show ViewCodePane, CodeGenPreviewer;
+import 'package:apidash_design_system/apidash_design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:apidash/consts.dart';
@@ -9,7 +10,7 @@ void main() {
   String code = r'''import 'package:http/http.dart' as http;
 
 void main() async {
-  var uri = Uri.parse('https://api.foss42.com/country/codes');
+  var uri = Uri.parse('https://api.apidash.dev/country/codes');
 
   final response = await http.get(uri);
 

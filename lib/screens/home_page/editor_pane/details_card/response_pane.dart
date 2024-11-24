@@ -9,14 +9,20 @@ class ResponsePane extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final selectedId = ref.watch(selectedIdStateProvider);
-    final sentRequestId = ref.watch(sentRequestIdStateProvider);
+    final isWorking = ref.watch(
+            selectedRequestModelProvider.select((value) => value?.isWorking)) ??
+        false;
+    final startSendingTime = ref.watch(
+        selectedRequestModelProvider.select((value) => value?.sendingTime));
     final responseStatus = ref.watch(
         selectedRequestModelProvider.select((value) => value?.responseStatus));
     final message = ref
         .watch(selectedRequestModelProvider.select((value) => value?.message));
-    if (sentRequestId != null && sentRequestId == selectedId) {
-      return const SendingWidget();
+
+    if (isWorking) {
+      return SendingWidget(
+        startSendingTime: startSendingTime,
+      );
     }
     if (responseStatus == null) {
       return const NotSentWidget();
@@ -37,14 +43,20 @@ class ResponseDetails extends ConsumerWidget {
         selectedRequestModelProvider.select((value) => value?.responseStatus));
     final message = ref
         .watch(selectedRequestModelProvider.select((value) => value?.message));
-    final responseModel = ref.watch(
-        selectedRequestModelProvider.select((value) => value?.responseModel));
+    final responseModel = ref.watch(selectedRequestModelProvider
+        .select((value) => value?.httpResponseModel));
     return Column(
       children: [
         ResponsePaneHeader(
           responseStatus: responseStatus,
           message: message,
           time: responseModel?.time,
+          onClearResponse: () {
+            final selectedRequest = ref.read(selectedRequestModelProvider);
+            ref
+                .read(collectionStateNotifierProvider.notifier)
+                .clearResponse(selectedRequest?.id);
+          },
         ),
         const Expanded(
           child: ResponseTabs(),
@@ -88,10 +100,10 @@ class ResponseHeadersTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final requestHeaders = ref.watch(selectedRequestModelProvider
-            .select((value) => value?.responseModel?.requestHeaders)) ??
+            .select((value) => value?.httpResponseModel?.requestHeaders)) ??
         {};
     final responseHeaders = ref.watch(selectedRequestModelProvider
-            .select((value) => value?.responseModel?.headers)) ??
+            .select((value) => value?.httpResponseModel?.headers)) ??
         {};
     return ResponseHeaders(
       responseHeaders: responseHeaders,

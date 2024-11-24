@@ -80,50 +80,11 @@ In case you have already setup Flutter, make sure to switch to `stable` branch a
 
 ### How to run API Dash locally?
 
-1. Fork the project.
-2. Create a clone of the forked project on your computer to run it locally.
-3. Based on your desktop environment, enable Windows, macOS or Linux for the project. Select the same target device.
-4. This project uses [Records feature in Dart](https://github.com/dart-lang/language/blob/main/accepted/future-releases/records/records-feature-specification.md), so to run the project execute the following command:
-
-```
-flutter run
-```
+Check out [here](https://github.com/foss42/apidash/blob/main/doc/dev_guide/setup_run.md)
 
 ### How to run tests?
 
-To run tests execute the following command:
-
-```
-flutter test --coverage
-```
-
-To generate coverage report as html execute:
-
-```
-genhtml coverage/lcov.info -o coverage/html  
-```
-
-**Note**: On macOS you need to have `lcov` installed on your system (`brew install lcov`) to run the above command.
-
-To view the coverage report in the browser for further analysis, execute: 
-
-```
-open coverage/html/index.html
-```
-
-#### Testing a single file
-
-To run tests specified in a single file, execute the following command:
-
-```
-flutter test <file_path>.dart
-```
-
-Example:
-
-```
-flutter test test/widgets/codegen_previewer_test.dart
-```
+Check out [here](https://github.com/foss42/apidash/blob/main/doc/dev_guide/testing.md)
 
 ### How to add a new package to pubspec.yaml?
 

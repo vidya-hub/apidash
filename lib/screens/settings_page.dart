@@ -1,9 +1,13 @@
+import 'package:apidash_core/apidash_core.dart';
+import 'package:apidash_design_system/apidash_design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/providers.dart';
+import '../services/services.dart';
 import '../widgets/widgets.dart';
 import '../common/utils.dart';
 import '../consts.dart';
+import '../extensions/extensions.dart';
 
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
@@ -16,13 +20,15 @@ class SettingsPage extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: kPh20t40,
-          child: kIsDesktop
-              ? Text("Settings",
-                  style: Theme.of(context).textTheme.headlineLarge)
-              : const SizedBox.shrink(),
-        ),
+        !context.isMediumWindow
+            ? Padding(
+                padding: kPh20t40,
+                child: kIsDesktop
+                    ? Text("Settings",
+                        style: Theme.of(context).textTheme.headlineLarge)
+                    : const SizedBox.shrink(),
+              )
+            : const SizedBox.shrink(),
         kIsDesktop
             ? const Padding(
                 padding: kPh20,
@@ -34,10 +40,8 @@ class SettingsPage extends ConsumerWidget {
         Expanded(
           child: ListView(
             shrinkWrap: true,
-            padding: kPh20,
             children: [
               SwitchListTile(
-                contentPadding: EdgeInsets.zero,
                 hoverColor: kColorTransparent,
                 title: const Text('Switch Theme Mode'),
                 subtitle: Text(
@@ -48,7 +52,6 @@ class SettingsPage extends ConsumerWidget {
                 },
               ),
               SwitchListTile(
-                contentPadding: EdgeInsets.zero,
                 hoverColor: kColorTransparent,
                 title: const Text('Collection Pane Scrollbar Visiblity'),
                 subtitle: Text(
@@ -61,47 +64,50 @@ class SettingsPage extends ConsumerWidget {
                 },
               ),
               ListTile(
-                contentPadding: EdgeInsets.zero,
                 hoverColor: kColorTransparent,
                 title: const Text('Default URI Scheme'),
                 subtitle: Text(
-                    'api.foss42.com → ${settings.defaultUriScheme}://api.foss42.com'),
-                trailing: DropdownMenu(
-                    onSelected: (value) {
+                    '$kDefaultUri → ${settings.defaultUriScheme}://$kDefaultUri'),
+                trailing: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                    borderRadius: kBorderRadius8,
+                  ),
+                  child: URIPopupMenu(
+                    value: settings.defaultUriScheme,
+                    onChanged: (value) {
                       ref
                           .read(settingsProvider.notifier)
                           .update(defaultUriScheme: value);
                     },
-                    initialSelection: settings.defaultUriScheme,
-                    dropdownMenuEntries: kSupportedUriSchemes
-                        .map<DropdownMenuEntry<String>>((value) {
-                      return DropdownMenuEntry<String>(
-                        value: value,
-                        label: value,
-                      );
-                    }).toList()),
+                    items: kSupportedUriSchemes,
+                  ),
+                ),
               ),
               ListTile(
-                contentPadding: EdgeInsets.zero,
                 hoverColor: kColorTransparent,
                 title: const Text('Default Code Generator'),
-                trailing: DropdownMenu(
-                    onSelected: (value) {
+                trailing: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                    borderRadius: kBorderRadius8,
+                  ),
+                  child: CodegenPopupMenu(
+                    value: settings.defaultCodeGenLang,
+                    onChanged: (value) {
                       ref
                           .read(settingsProvider.notifier)
                           .update(defaultCodeGenLang: value);
                     },
-                    initialSelection: settings.defaultCodeGenLang,
-                    dropdownMenuEntries: CodegenLanguage.values
-                        .map<DropdownMenuEntry<CodegenLanguage>>((value) {
-                      return DropdownMenuEntry<CodegenLanguage>(
-                        value: value,
-                        label: value.label,
-                      );
-                    }).toList()),
+                    items: CodegenLanguage.values,
+                  ),
+                ),
               ),
               CheckboxListTile(
-                contentPadding: EdgeInsets.zero,
                 title: const Text("Save Responses"),
                 subtitle:
                     const Text("Save disk space by not storing API responses"),
@@ -113,7 +119,6 @@ class SettingsPage extends ConsumerWidget {
                 },
               ),
               CheckboxListTile(
-                contentPadding: EdgeInsets.zero,
                 title: const Text("Show Save Alert on App Close"),
                 subtitle: const Text(
                     "Show a confirmation dialog to save workspace when the user closes the app"),
@@ -125,7 +130,6 @@ class SettingsPage extends ConsumerWidget {
                 },
               ),
               ListTile(
-                contentPadding: EdgeInsets.zero,
                 hoverColor: kColorTransparent,
                 title: const Text('Export Data'),
                 subtitle: const Text(
@@ -145,7 +149,29 @@ class SettingsPage extends ConsumerWidget {
                 ),
               ),
               ListTile(
-                contentPadding: EdgeInsets.zero,
+                hoverColor: kColorTransparent,
+                title: const Text('History Retention Period'),
+                subtitle: Text(
+                    'Your request history will be retained${settings.historyRetentionPeriod == HistoryRetentionPeriod.forever ? "" : " for"} ${settings.historyRetentionPeriod.label}'),
+                trailing: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                    borderRadius: kBorderRadius8,
+                  ),
+                  child: HistoryRetentionPopupMenu(
+                    value: settings.historyRetentionPeriod,
+                    onChanged: (value) {
+                      ref
+                          .read(settingsProvider.notifier)
+                          .update(historyRetentionPeriod: value);
+                    },
+                    items: HistoryRetentionPeriod.values,
+                  ),
+                ),
+              ),
+              ListTile(
                 hoverColor: kColorTransparent,
                 title: const Text('Clear Data'),
                 subtitle: const Text('Delete all requests data from the disk'),
@@ -161,9 +187,19 @@ class SettingsPage extends ConsumerWidget {
                       : () => showDialog<String>(
                             context: context,
                             builder: (BuildContext context) => AlertDialog(
+                              icon: const Icon(Icons.manage_history_rounded),
+                              iconColor: settings.isDark
+                                  ? kColorDarkDanger
+                                  : kColorLightDanger,
                               title: const Text('Clear Data'),
-                              content: const Text(
-                                  'This action will clear all the requests data from the disk and is irreversible. Do you want to proceed?'),
+                              titleTextStyle:
+                                  Theme.of(context).textTheme.titleLarge,
+                              content: ConstrainedBox(
+                                constraints:
+                                    const BoxConstraints(maxWidth: 300),
+                                child: const Text(
+                                    'This action will clear all the requests data from the disk and is irreversible. Do you want to proceed?'),
+                              ),
                               actions: <Widget>[
                                 TextButton(
                                   onPressed: () =>
@@ -173,6 +209,7 @@ class SettingsPage extends ConsumerWidget {
                                 TextButton(
                                   onPressed: () async {
                                     Navigator.pop(context, 'Yes');
+                                    await clearSharedPrefs();
                                     await ref
                                         .read(collectionStateNotifierProvider
                                             .notifier)
@@ -200,6 +237,15 @@ class SettingsPage extends ConsumerWidget {
                   ),
                 ),
               ),
+              ListTile(
+                title: const Text('About'),
+                subtitle: const Text(
+                    'Release Details, Support Channel, Report Bug / Request New Feature'),
+                onTap: () {
+                  showAboutAppDialog(context);
+                },
+              ),
+              kVSpacer20,
             ],
           ),
         ),
