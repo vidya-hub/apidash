@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:apidash/utils/utils.dart';
 import 'package:apidash/models/models.dart';
@@ -47,12 +48,24 @@ Future<(http.Response?, Duration?, String?)> request(
           if (formData.type == FormDataType.text) {
             multiPartRequest.fields.addAll({formData.name: formData.value});
           } else {
-            multiPartRequest.files.add(
-              await http.MultipartFile.fromPath(
-                formData.name,
-                formData.value,
-              ),
-            );
+            if (kIsWeb) {
+              // for web platforms
+              multiPartRequest.files.add(
+                http.MultipartFile.fromBytes(
+                  formData.name,
+                  formData.value["bytes"],
+                  filename: formData.value["name"],
+                ),
+              );
+            } else {
+              // For non-web platforms
+              multiPartRequest.files.add(
+                await http.MultipartFile.fromPath(
+                  formData.name,
+                  formData.value,
+                ),
+              );
+            }
           }
         }
         http.StreamedResponse multiPartResponse = await multiPartRequest.send();

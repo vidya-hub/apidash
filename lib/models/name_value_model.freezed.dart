@@ -12,7 +12,7 @@ part of 'name_value_model.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#custom-getters-and-methods');
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 NameValueModel _$NameValueModelFromJson(Map<String, dynamic> json) {
   return _NameValueModel.fromJson(json);
@@ -23,8 +23,12 @@ mixin _$NameValueModel {
   String get name => throw _privateConstructorUsedError;
   dynamic get value => throw _privateConstructorUsedError;
 
+  /// Serializes this NameValueModel to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-  @JsonKey(ignore: true)
+
+  /// Create a copy of NameValueModel
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   $NameValueModelCopyWith<NameValueModel> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -48,6 +52,8 @@ class _$NameValueModelCopyWithImpl<$Res, $Val extends NameValueModel>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
+  /// Create a copy of NameValueModel
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -68,31 +74,33 @@ class _$NameValueModelCopyWithImpl<$Res, $Val extends NameValueModel>
 }
 
 /// @nodoc
-abstract class _$$_NameValueModelCopyWith<$Res>
+abstract class _$$NameValueModelImplCopyWith<$Res>
     implements $NameValueModelCopyWith<$Res> {
-  factory _$$_NameValueModelCopyWith(
-          _$_NameValueModel value, $Res Function(_$_NameValueModel) then) =
-      __$$_NameValueModelCopyWithImpl<$Res>;
+  factory _$$NameValueModelImplCopyWith(_$NameValueModelImpl value,
+          $Res Function(_$NameValueModelImpl) then) =
+      __$$NameValueModelImplCopyWithImpl<$Res>;
   @override
   @useResult
   $Res call({String name, dynamic value});
 }
 
 /// @nodoc
-class __$$_NameValueModelCopyWithImpl<$Res>
-    extends _$NameValueModelCopyWithImpl<$Res, _$_NameValueModel>
-    implements _$$_NameValueModelCopyWith<$Res> {
-  __$$_NameValueModelCopyWithImpl(
-      _$_NameValueModel _value, $Res Function(_$_NameValueModel) _then)
+class __$$NameValueModelImplCopyWithImpl<$Res>
+    extends _$NameValueModelCopyWithImpl<$Res, _$NameValueModelImpl>
+    implements _$$NameValueModelImplCopyWith<$Res> {
+  __$$NameValueModelImplCopyWithImpl(
+      _$NameValueModelImpl _value, $Res Function(_$NameValueModelImpl) _then)
       : super(_value, _then);
 
+  /// Create a copy of NameValueModel
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
     Object? name = null,
     Object? value = freezed,
   }) {
-    return _then(_$_NameValueModel(
+    return _then(_$NameValueModelImpl(
       name: null == name
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
@@ -107,13 +115,13 @@ class __$$_NameValueModelCopyWithImpl<$Res>
 
 /// @nodoc
 @JsonSerializable()
-class _$_NameValueModel
+class _$NameValueModelImpl
     with DiagnosticableTreeMixin
     implements _NameValueModel {
-  const _$_NameValueModel({required this.name, required this.value});
+  const _$NameValueModelImpl({required this.name, required this.value});
 
-  factory _$_NameValueModel.fromJson(Map<String, dynamic> json) =>
-      _$$_NameValueModelFromJson(json);
+  factory _$NameValueModelImpl.fromJson(Map<String, dynamic> json) =>
+      _$$NameValueModelImplFromJson(json);
 
   @override
   final String name;
@@ -135,28 +143,31 @@ class _$_NameValueModel
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$_NameValueModel &&
+            other is _$NameValueModelImpl &&
             (identical(other.name, name) || other.name == name) &&
             const DeepCollectionEquality().equals(other.value, value));
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
       runtimeType, name, const DeepCollectionEquality().hash(value));
 
-  @JsonKey(ignore: true)
+  /// Create a copy of NameValueModel
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
-  _$$_NameValueModelCopyWith<_$_NameValueModel> get copyWith =>
-      __$$_NameValueModelCopyWithImpl<_$_NameValueModel>(this, _$identity);
+  _$$NameValueModelImplCopyWith<_$NameValueModelImpl> get copyWith =>
+      __$$NameValueModelImplCopyWithImpl<_$NameValueModelImpl>(
+          this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$_NameValueModelToJson(
+    return _$$NameValueModelImplToJson(
       this,
     );
   }
@@ -165,17 +176,20 @@ class _$_NameValueModel
 abstract class _NameValueModel implements NameValueModel {
   const factory _NameValueModel(
       {required final String name,
-      required final dynamic value}) = _$_NameValueModel;
+      required final dynamic value}) = _$NameValueModelImpl;
 
   factory _NameValueModel.fromJson(Map<String, dynamic> json) =
-      _$_NameValueModel.fromJson;
+      _$NameValueModelImpl.fromJson;
 
   @override
   String get name;
   @override
   dynamic get value;
+
+  /// Create a copy of NameValueModel
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(ignore: true)
-  _$$_NameValueModelCopyWith<_$_NameValueModel> get copyWith =>
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$NameValueModelImplCopyWith<_$NameValueModelImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

@@ -1,5 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+
+import 'dart:html' as html;
 
 const String kDataBox = "apidash-data";
 const String kKeyDataBoxIds = "ids";
@@ -7,7 +10,11 @@ const String kKeyDataBoxIds = "ids";
 const String kSettingsBox = "apidash-settings";
 
 Future<void> openBoxes() async {
-  await Hive.initFlutter();
+  if (kIsWeb) {
+    Hive.init(html.window.navigator.vendor);
+  } else {
+    await Hive.initFlutter();
+  }
   await Hive.openBox(kDataBox);
   await Hive.openBox(kSettingsBox);
 }

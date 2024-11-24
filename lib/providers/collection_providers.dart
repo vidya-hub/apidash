@@ -20,7 +20,7 @@ final selectedRequestModelProvider = StateProvider<RequestModel?>((ref) {
 });
 
 final requestSequenceProvider = StateProvider<List<String>>((ref) {
-  var ids = hiveHandler.getIds();
+  var ids = hiveHandler.getIds().cast<String>();
   return ids ?? [];
 });
 

@@ -8,7 +8,7 @@ part 'form_data_model.g.dart';
 class FormDataModel with _$FormDataModel {
   const factory FormDataModel({
     required String name,
-    required String value,
+    required dynamic value,
     required FormDataType type,
   }) = _FormDataModel;
 

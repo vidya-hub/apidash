@@ -31,7 +31,9 @@ class _AppState extends ConsumerState<App> with WindowListener {
 
   void _init() async {
     // Add this line to override the default close handler
-    await windowManager.setPreventClose(true);
+    if (kIsDesktop) {
+      await windowManager.setPreventClose(true);
+    }
     setState(() {});
   }
 

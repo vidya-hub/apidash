@@ -12,7 +12,7 @@ part of 'form_data_model.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#custom-getters-and-methods');
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 FormDataModel _$FormDataModelFromJson(Map<String, dynamic> json) {
   return _FormDataModel.fromJson(json);
@@ -21,11 +21,15 @@ FormDataModel _$FormDataModelFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$FormDataModel {
   String get name => throw _privateConstructorUsedError;
-  String get value => throw _privateConstructorUsedError;
+  dynamic get value => throw _privateConstructorUsedError;
   FormDataType get type => throw _privateConstructorUsedError;
 
+  /// Serializes this FormDataModel to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-  @JsonKey(ignore: true)
+
+  /// Create a copy of FormDataModel
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   $FormDataModelCopyWith<FormDataModel> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -36,7 +40,7 @@ abstract class $FormDataModelCopyWith<$Res> {
           FormDataModel value, $Res Function(FormDataModel) then) =
       _$FormDataModelCopyWithImpl<$Res, FormDataModel>;
   @useResult
-  $Res call({String name, String value, FormDataType type});
+  $Res call({String name, dynamic value, FormDataType type});
 }
 
 /// @nodoc
@@ -49,11 +53,13 @@ class _$FormDataModelCopyWithImpl<$Res, $Val extends FormDataModel>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
+  /// Create a copy of FormDataModel
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
     Object? name = null,
-    Object? value = null,
+    Object? value = freezed,
     Object? type = null,
   }) {
     return _then(_value.copyWith(
@@ -61,10 +67,10 @@ class _$FormDataModelCopyWithImpl<$Res, $Val extends FormDataModel>
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
               as String,
-      value: null == value
+      value: freezed == value
           ? _value.value
           : value // ignore: cast_nullable_to_non_nullable
-              as String,
+              as dynamic,
       type: null == type
           ? _value.type
           : type // ignore: cast_nullable_to_non_nullable
@@ -81,7 +87,7 @@ abstract class _$$FormDataModelImplCopyWith<$Res>
       __$$FormDataModelImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String name, String value, FormDataType type});
+  $Res call({String name, dynamic value, FormDataType type});
 }
 
 /// @nodoc
@@ -92,11 +98,13 @@ class __$$FormDataModelImplCopyWithImpl<$Res>
       _$FormDataModelImpl _value, $Res Function(_$FormDataModelImpl) _then)
       : super(_value, _then);
 
+  /// Create a copy of FormDataModel
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
     Object? name = null,
-    Object? value = null,
+    Object? value = freezed,
     Object? type = null,
   }) {
     return _then(_$FormDataModelImpl(
@@ -104,10 +112,10 @@ class __$$FormDataModelImplCopyWithImpl<$Res>
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
               as String,
-      value: null == value
+      value: freezed == value
           ? _value.value
           : value // ignore: cast_nullable_to_non_nullable
-              as String,
+              as dynamic,
       type: null == type
           ? _value.type
           : type // ignore: cast_nullable_to_non_nullable
@@ -128,7 +136,7 @@ class _$FormDataModelImpl implements _FormDataModel {
   @override
   final String name;
   @override
-  final String value;
+  final dynamic value;
   @override
   final FormDataType type;
 
@@ -138,20 +146,23 @@ class _$FormDataModelImpl implements _FormDataModel {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$FormDataModelImpl &&
             (identical(other.name, name) || other.name == name) &&
-            (identical(other.value, value) || other.value == value) &&
+            const DeepCollectionEquality().equals(other.value, value) &&
             (identical(other.type, type) || other.type == type));
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, name, value, type);
+  int get hashCode => Object.hash(
+      runtimeType, name, const DeepCollectionEquality().hash(value), type);
 
-  @JsonKey(ignore: true)
+  /// Create a copy of FormDataModel
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$FormDataModelImplCopyWith<_$FormDataModelImpl> get copyWith =>
@@ -168,7 +179,7 @@ class _$FormDataModelImpl implements _FormDataModel {
 abstract class _FormDataModel implements FormDataModel {
   const factory _FormDataModel(
       {required final String name,
-      required final String value,
+      required final dynamic value,
       required final FormDataType type}) = _$FormDataModelImpl;
 
   factory _FormDataModel.fromJson(Map<String, dynamic> json) =
@@ -177,11 +188,14 @@ abstract class _FormDataModel implements FormDataModel {
   @override
   String get name;
   @override
-  String get value;
+  dynamic get value;
   @override
   FormDataType get type;
+
+  /// Create a copy of FormDataModel
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$FormDataModelImplCopyWith<_$FormDataModelImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

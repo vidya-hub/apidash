@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:davi/davi.dart';
@@ -98,7 +99,7 @@ class _FormDataBodyState extends ConsumerState<FormDataWidget> {
                                 size: 20,
                               ),
                               style: ButtonStyle(
-                                shape: MaterialStatePropertyAll(
+                                shape: WidgetStatePropertyAll(
                                   RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(6),
                                   ),
@@ -107,10 +108,16 @@ class _FormDataBodyState extends ConsumerState<FormDataWidget> {
                               onPressed: () async {
                                 var pickedResult = await pickFile();
                                 if (pickedResult != null &&
-                                    pickedResult.files.isNotEmpty &&
-                                    pickedResult.files.first.path != null) {
+                                    pickedResult.files.isNotEmpty) {
                                   rows[idx] = rows[idx].copyWith(
-                                    value: pickedResult.files.first.path!,
+                                    value: kIsWeb
+                                        ? {
+                                            "name":
+                                                pickedResult.files.first.name,
+                                            "bytes":
+                                                pickedResult.files.first.bytes,
+                                          }
+                                        : pickedResult.files.first.path,
                                   );
                                   setState(() {});
                                   _onFieldChange(selectedId!);
@@ -119,7 +126,9 @@ class _FormDataBodyState extends ConsumerState<FormDataWidget> {
                               label: Text(
                                 (rows[idx].type == FormDataType.file &&
                                         rows[idx].value.isNotEmpty)
-                                    ? rows[idx].value.toString()
+                                    ? kIsWeb
+                                        ? rows[idx].value["name"]
+                                        : rows[idx].value.toString()
                                     : "Select File",
                                 textAlign: TextAlign.center,
                                 overflow: TextOverflow.ellipsis,
@@ -173,7 +182,7 @@ class _FormDataBodyState extends ConsumerState<FormDataWidget> {
       children: [
         Container(
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.background,
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: kBorderRadius12,
           ),
           margin: kP10,
