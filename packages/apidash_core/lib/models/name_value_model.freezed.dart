@@ -189,7 +189,7 @@ abstract class _NameValueModel implements NameValueModel {
   /// Create a copy of NameValueModel
   /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$NameValueModelImplCopyWith<_$NameValueModelImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

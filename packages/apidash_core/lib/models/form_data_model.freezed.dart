@@ -21,8 +21,9 @@ FormDataModel _$FormDataModelFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$FormDataModel {
   String get name => throw _privateConstructorUsedError;
-  dynamic get value => throw _privateConstructorUsedError;
+  String get value => throw _privateConstructorUsedError;
   FormDataType get type => throw _privateConstructorUsedError;
+  List<int> get fileBytes => throw _privateConstructorUsedError;
 
   /// Serializes this FormDataModel to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -40,7 +41,8 @@ abstract class $FormDataModelCopyWith<$Res> {
           FormDataModel value, $Res Function(FormDataModel) then) =
       _$FormDataModelCopyWithImpl<$Res, FormDataModel>;
   @useResult
-  $Res call({String name, dynamic value, FormDataType type});
+  $Res call(
+      {String name, String value, FormDataType type, List<int> fileBytes});
 }
 
 /// @nodoc
@@ -59,22 +61,27 @@ class _$FormDataModelCopyWithImpl<$Res, $Val extends FormDataModel>
   @override
   $Res call({
     Object? name = null,
-    Object? value = freezed,
+    Object? value = null,
     Object? type = null,
+    Object? fileBytes = null,
   }) {
     return _then(_value.copyWith(
       name: null == name
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
               as String,
-      value: freezed == value
+      value: null == value
           ? _value.value
           : value // ignore: cast_nullable_to_non_nullable
-              as dynamic,
+              as String,
       type: null == type
           ? _value.type
           : type // ignore: cast_nullable_to_non_nullable
               as FormDataType,
+      fileBytes: null == fileBytes
+          ? _value.fileBytes
+          : fileBytes // ignore: cast_nullable_to_non_nullable
+              as List<int>,
     ) as $Val);
   }
 }
@@ -87,7 +94,8 @@ abstract class _$$FormDataModelImplCopyWith<$Res>
       __$$FormDataModelImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String name, dynamic value, FormDataType type});
+  $Res call(
+      {String name, String value, FormDataType type, List<int> fileBytes});
 }
 
 /// @nodoc
@@ -104,22 +112,27 @@ class __$$FormDataModelImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? name = null,
-    Object? value = freezed,
+    Object? value = null,
     Object? type = null,
+    Object? fileBytes = null,
   }) {
     return _then(_$FormDataModelImpl(
       name: null == name
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
               as String,
-      value: freezed == value
+      value: null == value
           ? _value.value
           : value // ignore: cast_nullable_to_non_nullable
-              as dynamic,
+              as String,
       type: null == type
           ? _value.type
           : type // ignore: cast_nullable_to_non_nullable
               as FormDataType,
+      fileBytes: null == fileBytes
+          ? _value._fileBytes
+          : fileBytes // ignore: cast_nullable_to_non_nullable
+              as List<int>,
     ));
   }
 }
@@ -128,7 +141,11 @@ class __$$FormDataModelImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$FormDataModelImpl implements _FormDataModel {
   const _$FormDataModelImpl(
-      {required this.name, required this.value, required this.type});
+      {required this.name,
+      required this.value,
+      required this.type,
+      final List<int> fileBytes = const []})
+      : _fileBytes = fileBytes;
 
   factory _$FormDataModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$FormDataModelImplFromJson(json);
@@ -136,13 +153,21 @@ class _$FormDataModelImpl implements _FormDataModel {
   @override
   final String name;
   @override
-  final dynamic value;
+  final String value;
   @override
   final FormDataType type;
+  final List<int> _fileBytes;
+  @override
+  @JsonKey()
+  List<int> get fileBytes {
+    if (_fileBytes is EqualUnmodifiableListView) return _fileBytes;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_fileBytes);
+  }
 
   @override
   String toString() {
-    return 'FormDataModel(name: $name, value: $value, type: $type)';
+    return 'FormDataModel(name: $name, value: $value, type: $type, fileBytes: $fileBytes)';
   }
 
   @override
@@ -151,14 +176,16 @@ class _$FormDataModelImpl implements _FormDataModel {
         (other.runtimeType == runtimeType &&
             other is _$FormDataModelImpl &&
             (identical(other.name, name) || other.name == name) &&
-            const DeepCollectionEquality().equals(other.value, value) &&
-            (identical(other.type, type) || other.type == type));
+            (identical(other.value, value) || other.value == value) &&
+            (identical(other.type, type) || other.type == type) &&
+            const DeepCollectionEquality()
+                .equals(other._fileBytes, _fileBytes));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-      runtimeType, name, const DeepCollectionEquality().hash(value), type);
+  int get hashCode => Object.hash(runtimeType, name, value, type,
+      const DeepCollectionEquality().hash(_fileBytes));
 
   /// Create a copy of FormDataModel
   /// with the given fields replaced by the non-null parameter values.
@@ -179,8 +206,9 @@ class _$FormDataModelImpl implements _FormDataModel {
 abstract class _FormDataModel implements FormDataModel {
   const factory _FormDataModel(
       {required final String name,
-      required final dynamic value,
-      required final FormDataType type}) = _$FormDataModelImpl;
+      required final String value,
+      required final FormDataType type,
+      final List<int> fileBytes}) = _$FormDataModelImpl;
 
   factory _FormDataModel.fromJson(Map<String, dynamic> json) =
       _$FormDataModelImpl.fromJson;
@@ -188,9 +216,11 @@ abstract class _FormDataModel implements FormDataModel {
   @override
   String get name;
   @override
-  dynamic get value;
+  String get value;
   @override
   FormDataType get type;
+  @override
+  List<int> get fileBytes;
 
   /// Create a copy of FormDataModel
   /// with the given fields replaced by the non-null parameter values.

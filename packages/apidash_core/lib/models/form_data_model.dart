@@ -8,8 +8,9 @@ part 'form_data_model.g.dart';
 class FormDataModel with _$FormDataModel {
   const factory FormDataModel({
     required String name,
-    required dynamic value,
+    required String value,
     required FormDataType type,
+    @Default([]) List<int> fileBytes,
   }) = _FormDataModel;
 
   factory FormDataModel.fromJson(Map<String, Object?> json) =>
@@ -20,4 +21,5 @@ const kFormDataEmptyModel = FormDataModel(
   name: "",
   value: "",
   type: FormDataType.text,
+  fileBytes: [], // Ensure the default constant is aligned with the model
 );

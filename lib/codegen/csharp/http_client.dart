@@ -48,9 +48,9 @@ using (var request = new HttpRequestMessage(HttpMethod.{{ method | capitalize }}
         { new StringContent("{{ data.value }}"), "{{ data.name }}" },
 {%- else %}
         {
-            new StreamContent(File.OpenRead("{{ data.value }}")), 
+            new StreamContent(File.OpenRead("{{ data.value["name"] }}")), 
             "{{ data.name }}", 
-            "{{ data.value }}"
+            "{{ data.value["name"] }}"
         },
 {%- endif %}
 {%- endfor %}

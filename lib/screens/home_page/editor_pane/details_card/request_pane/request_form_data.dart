@@ -132,7 +132,9 @@ class _FormDataBodyState extends ConsumerState<FormDataWidget> {
                         if (pickedResult != null &&
                             pickedResult.path.isNotEmpty) {
                           formRows[index] = formRows[index].copyWith(
-                            value: pickedResult.path,
+                            value:
+                                kIsWeb ? pickedResult.name : pickedResult.path,
+                            fileBytes: await pickedResult.readAsBytes(),
                           );
                           setState(() {});
                           _onFieldChange(selectedId!);

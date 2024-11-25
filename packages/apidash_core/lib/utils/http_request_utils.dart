@@ -31,13 +31,13 @@ List<NameValueModel>? mapToRows(Map<String, String>? kvMap) {
   return finalRows;
 }
 
-List<Map<String, String>>? rowsToFormDataMapList(
+List<Map<String, dynamic>>? rowsToFormDataMapList(
   List<FormDataModel>? kvRows,
 ) {
   if (kvRows == null) {
     return null;
   }
-  List<Map<String, String>> finalMap = kvRows
+  List<Map<String, dynamic>> finalMap = kvRows
       .map((FormDataModel formData) =>
           (formData.name.trim().isEmpty && formData.value.trim().isEmpty)
               ? null
@@ -45,6 +45,7 @@ List<Map<String, String>>? rowsToFormDataMapList(
                   "name": formData.name,
                   "value": formData.value,
                   "type": formData.type.name,
+                  "fileBytes": formData.fileBytes,
                 })
       .whereNotNull()
       .toList();
@@ -61,6 +62,7 @@ List<FormDataModel>? mapListToFormDataModelRows(List<Map>? kvMap) {
         name: formData["name"],
         value: formData["value"],
         type: getFormDataType(formData["type"]),
+        fileBytes: formData["fileBytes"] ?? [],
       );
     },
   ).toList();

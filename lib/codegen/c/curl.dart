@@ -53,7 +53,7 @@ int main() {
     {% for field in fields %}{% if field.type == "file" %}
     part = curl_mime_addpart(mime);
     curl_mime_name(part, "{{field.name}}");
-    curl_mime_filedata(part, "{{field.value}}");
+    curl_mime_filedata(part, "{{field.value["name"]}}");
     {% else %}  
     part = curl_mime_addpart(mime);    
     curl_mime_name(part, "{{field.name}}");    

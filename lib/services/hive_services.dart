@@ -102,7 +102,7 @@ class HiveHandler {
     historyLazyBox = Hive.lazyBox(kHistoryLazyBox);
   }
 
-  dynamic getIds() => dataBox.get(kKeyDataBoxIds);
+  dynamic getIds() => (dataBox.get(kKeyDataBoxIds) ?? []).cast<String>();
   Future<void> setIds(List<String>? ids) => dataBox.put(kKeyDataBoxIds, ids);
 
   dynamic getRequestModel(String id) => dataBox.get(id);
@@ -112,7 +112,8 @@ class HiveHandler {
 
   void delete(String key) => dataBox.delete(key);
 
-  dynamic getEnvironmentIds() => environmentBox.get(kKeyEnvironmentBoxIds);
+  dynamic getEnvironmentIds() =>
+      (environmentBox.get(kKeyEnvironmentBoxIds) ?? []).cast<String>();
   Future<void> setEnvironmentIds(List<String>? ids) =>
       environmentBox.put(kKeyEnvironmentBoxIds, ids);
 
@@ -123,7 +124,8 @@ class HiveHandler {
 
   Future<void> deleteEnvironment(String id) => environmentBox.delete(id);
 
-  dynamic getHistoryIds() => historyMetaBox.get(kHistoryBoxIds);
+  dynamic getHistoryIds() =>
+      (historyMetaBox.get(kHistoryBoxIds) ?? []).cast<String>();
   Future<void> setHistoryIds(List<String>? ids) =>
       historyMetaBox.put(kHistoryBoxIds, ids);
 

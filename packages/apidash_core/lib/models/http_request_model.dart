@@ -63,7 +63,7 @@ class HttpRequestModel with _$HttpRequestModel {
       hasFormDataContentType &&
       formDataMapList.isNotEmpty;
   List<FormDataModel> get formDataList => formData ?? <FormDataModel>[];
-  List<Map<String, String>> get formDataMapList =>
+  List<Map<String, dynamic>> get formDataMapList =>
       rowsToFormDataMapList(formDataList) ?? [];
   bool get hasFileInFormData => formDataList
       .map((e) => e.type == FormDataType.file)

@@ -50,9 +50,10 @@ Future<(HttpResponse?, Duration?, String?)> request(
               multiPartRequest.fields.addAll({formData.name: formData.value});
             } else {
               multiPartRequest.files.add(
-                await http.MultipartFile.fromPath(
+                http.MultipartFile.fromBytes(
                   formData.name,
-                  formData.value,
+                  formData.fileBytes,
+                  filename: formData.value,
                 ),
               );
             }
